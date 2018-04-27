@@ -20,6 +20,12 @@
          *   ],
          * ];
          */
-
-
+        //状态检查
+        public static function status(){
+            $par = [
+                'act' => 'server',
+                'method' => 'status',
+            ];
+            return $par;
+        }
     }

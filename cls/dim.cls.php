@@ -7,9 +7,9 @@
      */
     class dim{
 
-        public static $server;//服务
+        public static $lock;//锁
 
-        public static $client;//客户端
+        public static $server;//服务
 
         public static $mem;//缓存
 
@@ -27,10 +27,10 @@
             raft::init();
             //4. 找寻当前配置
             raft::leader();
-            //5. 初始化swoole_server
+            //5. 设置互斥锁
+            self::$lock = new swoole_lock(SWOOLE_MUTEX);
+            //6. 初始化swoole_server
             self::$server = new swoole_server(raft::$current['host'], raft::$current['port']);
-            //6. 初始化swoole_client 同步
-            self::$client = new swoole_client(SWOOLE_SOCK_TCP);
         }
 
         //Start!
@@ -63,8 +63,14 @@
         //*工人进程开启
         public static function onWorkerStart($server, $worker_id){
             self::$mem = mem::get_instance(1);
-            if(self::$server->taskworker){
-                self::$server->tick(1000, 'dim::onTimer');
+            if(!self::$server->taskworker){
+                if(self::$lock->trylock()){
+                    $par = [
+                        'act' => 'server',
+                        'method' => 'run',
+                    ];
+                    dim::$server->task($par);
+                }
             }
         }
         //*连接
@@ -85,6 +91,7 @@
         public static function onReceive($server, $fd, $reactor_id, $data){
             try{
                 $data = json_decode($data, 1);
+                var_dump($data);
                 if(!$data) self::close($fd, 31);
                 if(!isset($data['uid'])) self::close($fd, 32);
                 if($data['uid'] != uid($fd)) self::close($fd, 35);
@@ -93,7 +100,7 @@
                 $file = ROOT.'act/'.$data['act'].'.act.php';
                 if(!file_exists($file)) self::close($fd, 36);
                 require_once $file;
-                if(!in_array($data['method'], ['sign', 'leader'])){
+                if(!in_array($data['method'], ['sign'])){
                     if(!isset($data['session'])) self::close($fd, 37);
                     $session = self::$mem->hget($data['uid'], 'session');
                     if(!$session) self::close($fd, 37);
@@ -143,17 +150,13 @@
                 if(!isset($data['act'])) error(33);
                 if(!isset($data['method'])) error(34);
                 switch($data['act']){
-                    case 'leader':
-                    case 'follower':
-                    case 'candidater':
-                        $rs = $data['act']::$data['method']();
-                        if($rs) self::$server->finish('ok');
-                        break;
                     default:
-                        require ROOT.'task/'.$data['act'].'.task.php';
+                        $file = ROOT.'task/'.$data['act'].'.task.php';
+                        if(!file_exists($file)) error(38);
+                        require_once $file;
                         $class_name = $data['act'].'Task';
                         $cls = new $class_name($data);
-                        $rs = $cls->$data['method']();
+                        $rs = $cls->{$data['method']}();
                         if($rs) self::$server->finish('ok');
                 }
             }catch (Exception $e){
@@ -165,21 +168,7 @@
             echo $task_id.'::完成'.PHP_EOL;
         }
         //*定时器
-        public static function onTimer($timer_id){
-            if(!task::$follower) follower::deal();
-            if(raft::$id==raft::$leader && !task::$leader) leader::deal();
-            if(raft::$id!=raft::$leader && time() > raft::$timeout) candidater::vote();
-            if(task::$task){
-                foreach(task::$task as $k => $v){
-                    $par = [
-                        'act' => $v['act'],
-                        'method' => $v['method'],
-                    ];
-                    self::$server->task($par);
-                    unset(task::$task[$k]);
-                }
-            }
-        }
+        public static function onTimer($timer_id){}
         //加载文件
         public static function load(){
             $cls_lists = glob(ROOT.'cls/*.cls.php');

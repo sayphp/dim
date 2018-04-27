@@ -61,7 +61,7 @@
                 case 3://本地
                     $free_lists = [];
                     foreach(self::$servers as $id => $ini){
-                        $data = self::request($id, follower::join());
+                        $data = request($id, server::leader());
                         if($data){
                             if($data && $data['status']==0){
                                 self::$leader = $data['data']['leader'];
@@ -79,20 +79,4 @@
                     break;
             }
         }
-
-        //发送请求
-        public static function request($id,$par){
-            $client = new swoole_client(SWOOLE_SOCK_TCP);
-            $rs = @$client->connect(raft::$servers[$id]['host'], raft::$servers[$id]['port']);
-            if(!$rs) return false;
-            $rs = $client->send(json_encode($par));
-            if(!$rs) return false;
-            $str = $client->recv();
-            $data = json_decode($str, 1);
-            $client->close();
-            return $data;
-        }
-
-
-
     }
