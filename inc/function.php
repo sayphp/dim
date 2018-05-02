@@ -1,11 +1,18 @@
 <?php
     /**
      * 公用方法
+     * say
+     * 2018-05-01
      */
 
     function error($code, $msg=null){
-        $msg = $msg?$msg:code::error($code);
+        $msg = $msg?$msg:conf::error($code);
         throw new Exception($msg, $code);
+    }
+
+    function close($fd, $code, $msg=null){
+        dim::$server->close($fd);
+        error($code, $msg);
     }
 
     //通讯id
@@ -19,8 +26,9 @@
     }
     //服务间请求接口
     function request($id, $info){
+        var_dump($info);
         $client = new swoole_client(SWOOLE_SOCK_TCP);
-        $rs = @$client->connect(raft::$servers[$id]['host'], raft::$servers[$id]['port']);
+        $rs = @$client->connect(conf::$server[$id]['host'], conf::$server[$id]['port']);
         if(!$rs) return false;
         //接受链接uid
         $str = $client->recv();
@@ -29,7 +37,7 @@
         if($data['status']!=0) return false;
         $info['uid'] = $data['data']['uid'];
         //注册
-        $rs = $client->send(json_encode(server::reg($info['uid'])));
+        $rs = $client->send(json_encode(askServ::sign($info['uid'])));
         $str = $client->recv();
         $data = json_decode($str, 1);
         if(!$data) return false;

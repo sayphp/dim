@@ -1,9 +1,11 @@
 <?php
     /*
-     * actInterface
-     *
+     * appInterface
+     * 应用接口
+     * say
+     * 2018-04-28
      */
-    interface actInterface{
+    interface appInterface{
 
         public function sign();//登陆
 

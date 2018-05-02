@@ -1,6 +1,6 @@
 <?php
     /*
-     * server.cls.php
+     * server.core.php
      * 服务类
      * Say
      * 2018-04-23

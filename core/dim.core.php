@@ -1,6 +1,6 @@
 <?php
     /**
-     * dim.cls.php
+     * dim.core.php
      * 分布式即时通讯服务类
      * say
      * 2018-03-28
@@ -19,17 +19,13 @@
 
         //初始化
         public static function init(){
-            //1. 载入目录配置
-            self::load();
-            //2. 加载错误码
-            code::init();
-            //3. 获取服务配置
+            //1. 获取服务配置
+            conf::init();
+            //2. 获取raft配置
             raft::init();
-            //4. 找寻当前配置
-            raft::leader();
-            //5. 设置互斥锁
+            //3. 设置互斥锁
             self::$lock = new swoole_lock(SWOOLE_MUTEX);
-            //6. 初始化swoole_server
+            //4. 初始化swoole_server
             self::$server = new swoole_server(raft::$current['host'], raft::$current['port']);
         }
 
@@ -45,12 +41,6 @@
             self::$server->on('Task', 'dim::onTask');
             self::$server->on('Finish', 'dim::onFinish');
             self::$server->start();
-        }
-
-        //关闭连接
-        public static function close($fd, $code=999){
-            self::$server->close($fd);
-            error($code);
         }
         //*服务开启
         public static function onStart($server){
@@ -92,23 +82,24 @@
             try{
                 $data = json_decode($data, 1);
                 var_dump($data);
-                if(!$data) self::close($fd, 31);
-                if(!isset($data['uid'])) self::close($fd, 32);
-                if($data['uid'] != uid($fd)) self::close($fd, 35);
-                if(!isset($data['act'])) self::close($fd, 33);
-                if(!isset($data['method'])) self::close($fd, 34);
-                $file = ROOT.'act/'.$data['act'].'.act.php';
-                if(!file_exists($file)) self::close($fd, 36);
+                if(!$data) close($fd, 301);
+                if(!isset($data['uid'])) close($fd, 201);
+                if($data['uid'] != uid($fd)) close($fd, 221);
+                if(!isset($data['act'])) close($fd, 202);
+                if(!isset($data['method'])) close($fd, 203);
+                $file = ROOT.'app/'.$data['act'].'.app.php';
+                if(!file_exists($file)) close($fd, 11);
                 require_once $file;
                 if(!in_array($data['method'], ['sign'])){
-                    if(!isset($data['session'])) self::close($fd, 37);
+                    if(!isset($data['session'])) close($fd, 204);
                     $session = self::$mem->hget($data['uid'], 'session');
-                    if(!$session) self::close($fd, 37);
-                    if($session!=$data['session']) self::close($fd, 37);
+                    if(!$session) close($fd, 224);
+                    if($session!=$data['session']) close($fd, 224);
                 }
-                $class_name = $data['act'].'Act';
-                if(!class_exists($class_name)) self::close($fd, 11);
-                $cls = new $class_name($server, $fd, $data);
+                $class_name = $data['act'].'App';
+                if(!class_exists($class_name)) close($fd, 12);
+                $cls = new $class_name($fd, $data);
+                if(!method_exists($cls, $data['method'])) close($fd, 13);
                 $cls->{$data['method']}();
                 $data = [
                     'status' => 0,
@@ -137,7 +128,6 @@
                 self::$server->send($fd, json_encode($data));
                 echo $e->getCode().'::'.$e->getMessage().PHP_EOL;
             }
-
         }
         //*链接断开
         public static function onClose($server, $fd, $reactor_id){
@@ -147,18 +137,15 @@
         //*任务
         public static function onTask($server, $task_id, $src_worker_id, $data){
             try{
-                if(!isset($data['act'])) error(33);
-                if(!isset($data['method'])) error(34);
-                switch($data['act']){
-                    default:
-                        $file = ROOT.'task/'.$data['act'].'.task.php';
-                        if(!file_exists($file)) error(38);
-                        require_once $file;
-                        $class_name = $data['act'].'Task';
-                        $cls = new $class_name($data);
-                        $rs = $cls->{$data['method']}();
-                        if($rs) self::$server->finish('ok');
-                }
+                if(!isset($data['act'])) error(202);
+                if(!isset($data['method'])) error(203);
+                $file = ROOT.'task/'.$data['act'].'.task.php';
+                if(!file_exists($file)) error(11);
+                require_once $file;
+                $class_name = $data['act'].'Task';
+                $cls = new $class_name($data);
+                $rs = $cls->{$data['method']}();
+                if($rs) self::$server->finish('ok');
             }catch (Exception $e){
                 echo $e->getCode().'::'.$e->getMessage().PHP_EOL;
             }
@@ -169,13 +156,4 @@
         }
         //*定时器
         public static function onTimer($timer_id){}
-        //加载文件
-        public static function load(){
-            $cls_lists = glob(ROOT.'cls/*.cls.php');
-            foreach ($cls_lists as $file){
-                if($file==ROOT.'cls/dim.cls.php') continue;
-                require $file;
-            }
-            require ROOT.'inc/function.php';
-        }
     }

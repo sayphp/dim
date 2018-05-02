@@ -5,11 +5,9 @@
      * Date: 18-3-14
      * Time: 上午11:00
      */
-    class act{
+    class app{
 
         public $method = 1;//消息模式
-
-        protected $server;
 
         protected $fd;
 
@@ -17,14 +15,13 @@
 
         public $data;
 
-        public function __construct($server, $fd, $par){
-            $this->server = $server;
+        public function __construct($fd, $par){
             $this->fd = $fd;
             $this->par = $par;
         }
 
         public function __call($method, $arg){
-            close($this->server, $this->fd, 12);
+            close($this->fd, 13);
         }
 
         public function get($key){

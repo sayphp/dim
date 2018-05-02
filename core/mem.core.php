@@ -1,6 +1,6 @@
 <?php
     /**
-     * redis.cls.php
+     * redis.core.php
      * 共享内存类
      */
     class mem{

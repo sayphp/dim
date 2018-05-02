@@ -1,7 +1,7 @@
 <?php
     /**
      * 服务器任务类
-     * serverTask.cls.php
+     * serverTask.task.php
      * say
      * 2018-04-27
      */
@@ -10,7 +10,7 @@
         public function run(){
             while(true){
                 //1. 服务状态检查
-                request(raft::$id, task::status());
+                request(raft::$id, askServ::status());
                 echo 'server status check'.time().PHP_EOL;
                 //2. 分发数据落地服务
                 echo 'publish task'.time().PHP_EOL;
@@ -21,7 +21,8 @@
         }
         //服务器状态检查
         public function status(){
-            echo '状态正常'.PHP_EOL;
+            $status = appServ::status();
+            var_dump($status);
         }
         //服务器数据落地
         public function land(){

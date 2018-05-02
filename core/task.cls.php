@@ -1,6 +1,6 @@
 <?php
     /**
-     * task.cls.php
+     * task.core.php
      * 定时器
      * say
      * 2018-04-02

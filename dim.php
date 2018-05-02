@@ -6,7 +6,7 @@
      * 2018-03-28
      */
     define('ROOT', __DIR__.DIRECTORY_SEPARATOR);
-    require 'cls/dim.cls.php';
+    require ROOT.'inc/init.php';
 
     dim::init();
     dim::start();

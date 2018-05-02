@@ -1,14 +1,13 @@
 <?php
     /**
      * 初始化脚本
+     * init.php
+     * say
+     * 2018-04-28
      */
-
-    $conf_lists = glob(ROOT.'conf/*.conf.php');
-    foreach($conf_lists as $file){
+    $range = '{'.ROOT.'core/*.core.php,'.ROOT.'raft/*.raft.php,'.ROOT.'serv/*.serv.php,'.ROOT.'interface/*.interface.php}';
+    $file_lists = glob($range, GLOB_BRACE);
+    foreach ($file_lists as $file){
         require $file;
     }
-    $cls_lists = glob(CLS.'*.cls.php');
-    foreach ($cls_lists as $file){
-        require $file;
-    }
-    require INC.'function.php';
+    require ROOT.'/inc/function.php';
