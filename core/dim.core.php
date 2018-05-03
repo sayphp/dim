@@ -19,14 +19,19 @@
 
         //初始化
         public static function init(){
-            //1. 获取服务配置
-            conf::init();
-            //2. 获取raft配置
-            raft::init();
-            //3. 设置互斥锁
-            self::$lock = new swoole_lock(SWOOLE_MUTEX);
-            //4. 初始化swoole_server
-            self::$server = new swoole_server(raft::$current['host'], raft::$current['port']);
+            try{
+                //1. 获取服务配置
+                conf::init();
+                //2. 获取raft配置
+                raft::init();
+                //3. 设置互斥锁
+                self::$lock = new swoole_lock(SWOOLE_MUTEX);
+                //4. 初始化swoole_server
+                self::$server = new swoole_server(raft::$current['host'], raft::$current['port']);
+            }catch (Exception $e){
+                echo $e->getCode().'::'.$e->getMessage().PHP_EOL;
+                exit();
+            }
         }
 
         //Start!
@@ -81,7 +86,6 @@
         public static function onReceive($server, $fd, $reactor_id, $data){
             try{
                 $data = json_decode($data, 1);
-                var_dump($data);
                 if(!$data) close($fd, 301);
                 if(!isset($data['uid'])) close($fd, 201);
                 if($data['uid'] != uid($fd)) close($fd, 221);

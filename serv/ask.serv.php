@@ -39,17 +39,15 @@
             ];
         }
         //登陆
-        public static function sign($uid=0, $id=0){
-            $id = $id?$id:raft::$id;
+        public static function sign($uid=0, $sid=0){
             $par = [
                 'act' => 'server',
                 'method' => 'sign',
                 'uid' => $uid,
-                'id' => $id,//本机ID
-                'host' => raft::$current['host'],//本机
-                'port' => raft::$current['port'],
-                'pass' => raft::$current['pass'],
-                'leader_pass' => conf::$server[raft::$leader]['pass'],
+                'sid' => $sid,//服务ID
+                'shost' => conf::$server[$sid]['host'],//服务
+                'sport' => conf::$server[$sid]['port'],
+                'spass' => conf::$server[$sid]['pass'],
             ];
             return $par;
         }

@@ -9,12 +9,11 @@
         //登陆
         public function sign(){
             $uid = $this->get('uid');
-            $leader_pass = $this->get('leader_pass');
-            $id = $this->get('id');
-            $host = $this->get('host');
-            $port = $this->get('port');
-            $pass = $this->get('pass');
-            $this->data['session'] = appServ::sign($this->fd, $uid, $leader_pass, $id, $host, $port, $pass);
+            $sid = $this->get('sid');
+            $shost = $this->get('shost');
+            $sport = $this->get('sport');
+            $spass = $this->get('spass');
+            $this->data['session'] = appServ::sign($this->fd, $uid, $sid, $shost, $sport, $spass);
         }
 
         public function msg(){

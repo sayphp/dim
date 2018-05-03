@@ -33,20 +33,11 @@
             return raft::$leader;
         }
         //登陆
-        public static function sign($fd, $uid, $leader_pass, $id, $host, $port, $pass){
-            if(conf::$server[raft::$leader]['pass']!=$leader_pass) error(32);
-            if(conf::$server[$id]['status']==1) error(33);
-            foreach(conf::$server as $k => $v){
-                if($k==$id) continue;
-                if($v['status']!=1) continue;
-                if($v['host']==$host && $v['port']==$port) error(33);
-            }
-            if(raft::$current==raft::$leader){
-                conf::$server[$id]['host'] = $host;
-                conf::$server[$id]['port'] = $port;
-                conf::$server[$id]['pass'] = $pass;
-                conf::$server[$id]['status'] = 1;
-            }
+        public static function sign($fd, $uid, $sid, $shost, $sport, $spass){
+            if($sid==raft::$id) error(41);
+            if(conf::$server[raft::$id]['host']!=$shost) error(42);
+            if(conf::$server[raft::$id]['port']!=$sport) error(43);
+            if(conf::$server[raft::$id]['pass']!=$spass) error(44);
             $session = session($fd, 'server');
             $rs = dim::$mem->hset($uid, 'session', $session);
             return $session;

@@ -40,6 +40,7 @@
                 case 3://本地
                     $free_lists = [];
                     foreach(conf::$server as $id => $ini){
+                        if(!self::$leader) self::$leader = $id;
                         $data = request($id, askServ::leader());
                         if($data){
                             if($data && $data['status']==0){
@@ -47,6 +48,7 @@
                             }
                         }else{
                             $free_lists[$id] = $ini;
+                            self::$leader = null;
                         }
                     }
                     if(!$free_lists) error(31);//所有服务器均已运行

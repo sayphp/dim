@@ -22,7 +22,7 @@
         //服务器状态检查
         public function status(){
             $status = appServ::status();
-            var_dump($status);
+            var_dump(conf::$server, raft::$leader, raft::$id);
         }
         //服务器数据落地
         public function land(){

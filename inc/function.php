@@ -26,7 +26,6 @@
     }
     //服务间请求接口
     function request($id, $info){
-        var_dump($info);
         $client = new swoole_client(SWOOLE_SOCK_TCP);
         $rs = @$client->connect(conf::$server[$id]['host'], conf::$server[$id]['port']);
         if(!$rs) return false;
