@@ -9,8 +9,6 @@
 
         public static $ini = [];//配置
 
-        public static $is_task = 0;//任务执行中
-
         public static $id;//服务索引
 
         public static $role;//角色 1.leader 2.follower 3.candidate

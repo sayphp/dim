@@ -10,7 +10,18 @@
         public static function check(){}
         //服务状态
         public static function status(){
-            return dim::$server->stats();
+            //1.检查当前服务器情况
+            $status = dim::$server->stats();
+            if(raft::$id==raft::$leader){//2.当前服务器是否leader
+                foreach(conf::$server as $id => $ini){
+                    if($id==raft::$id) continue;
+                    if(!$ini['status']) continue;
+                    $data = request($id, leaderRaft::term());
+                }
+            }elseif(raft::$timeout>time()){//3.是否要变成竞选者
+
+            }
+            return true;
         }
         //服务数据落地
         public static function backup(){}

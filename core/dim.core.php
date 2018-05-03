@@ -99,6 +99,7 @@
                     $session = self::$mem->hget($data['uid'], 'session');
                     if(!$session) close($fd, 224);
                     if($session!=$data['session']) close($fd, 224);
+                    //TODO：追加角色验证，可以约束不同身份的调用，后期追加
                 }
                 $class_name = $data['act'].'App';
                 if(!class_exists($class_name)) close($fd, 12);
