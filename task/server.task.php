@@ -11,18 +11,18 @@
             while(true){
                 //1. 服务状态检查
                 request(raft::$id, askServ::status());
-                echo 'server status check'.time().PHP_EOL;
+//                echo 'server status check'.time().PHP_EOL;
                 //2. 分发数据落地服务
-                echo 'publish task'.time().PHP_EOL;
+//                echo 'publish task'.time().PHP_EOL;
                 //3. 自定义任务处理
-                echo 'custom task'.time().PHP_EOL;
+//                echo 'custom task'.time().PHP_EOL;
                 sleep(5);
             }
         }
         //服务器状态检查
         public function status(){
             $status = appServ::status();
-            var_dump(conf::$server, raft::$leader, raft::$id);
+            var_dump(raft::$id, raft::$leader);
         }
         //服务器数据落地
         public function land(){

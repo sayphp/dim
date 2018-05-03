@@ -34,7 +34,7 @@
         }
         //登陆
         public static function sign($fd, $uid, $sid, $shost, $sport, $spass){
-            if($sid==raft::$id) error(41);
+            if($sid!=raft::$id) error(41);
             if(conf::$server[raft::$id]['host']!=$shost) error(42);
             if(conf::$server[raft::$id]['port']!=$sport) error(43);
             if(conf::$server[raft::$id]['pass']!=$spass) error(44);

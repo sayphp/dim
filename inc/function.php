@@ -36,7 +36,7 @@
         if($data['status']!=0) return false;
         $info['uid'] = $data['data']['uid'];
         //注册
-        $rs = $client->send(json_encode(askServ::sign($info['uid'])));
+        $rs = $client->send(json_encode(askServ::sign($info['uid'], $id)));
         $str = $client->recv();
         $data = json_decode($str, 1);
         if(!$data) return false;
