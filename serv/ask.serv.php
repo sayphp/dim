@@ -30,7 +30,20 @@
         //转发消息
         public static function forward(){}
         //加入集群
-        public static function join(){}
+        public static function join(){
+            return [
+                'act' => 'server',
+                'method' => 'join',
+                'cid' => raft::$id,
+                'chost' => conf::$server[raft::$id]['host'],
+                'cport' => conf::$server[raft::$id]['port'],
+                'cpass' => conf::$server[raft::$id]['pass'],
+                'lid' => raft::$leader,
+                'lhost' => conf::$server[raft::$leader]['host'],
+                'lport' => conf::$server[raft::$leader]['port'],
+                'lpass' => conf::$server[raft::$leader]['pass'],
+            ];
+        }
         //leader信息
         public static function leader(){
             return [

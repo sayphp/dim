@@ -24,8 +24,4 @@
             $status = appServ::status();
             var_dump('检查服务器状态');
         }
-        //服务器数据落地
-        public function land(){
-
-        }
     }

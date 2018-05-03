@@ -31,4 +31,16 @@
         public function status(){
             dim::$server->task(askServ::status());
         }
+        //加入集群
+        public function join(){
+            $cid = $this->get('cid');
+            $chost = $this->get('chost');
+            $cport = $this->get('cport');
+            $cpass = $this->get('cpass');
+            $lid = $this->get('lid');
+            $lhost = $this->get('lhost');
+            $lport = $this->get('lport');
+            $lpass = $this->get('lpass');
+            $this->data['timeout'] = appServ::join($cid, $chost, $cport, $cpass, $lid, $lhost, $lport, $lpass);
+        }
     }
