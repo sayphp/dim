@@ -43,4 +43,9 @@
             $lpass = $this->get('lpass');
             $this->data['timeout'] = appServ::join($cid, $chost, $cport, $cpass, $lid, $lhost, $lport, $lpass);
         }
+        //任期
+        public function term(){
+            $term = $this->get('term');
+            appRaft::term($term);
+        }
     }

@@ -30,6 +30,7 @@
         public static function init(){
             self::$raft = new swoole_table(1);
             self::$raft->column('id', swoole_table::TYPE_INT, 2);//当前服务器编号
+            self::$raft->column('leader', swoole_table::TYPE_INT, 2);//当前服务器编号
             self::$raft->column('role', swoole_table::TYPE_INT, 1);//当前服务器角色
             self::$raft->column('timeout', swoole_table::TYPE_INT, 4);//超时时间戳
             self::$raft->column('term', swoole_table::TYPE_INT, 4);//任期
@@ -73,5 +74,35 @@
                 default:
                     error(101);
             }
+        }
+        //获取当前服务索引
+        public static function id(){
+            return self::$raft->get(1, 'id');
+        }
+        //获取leader服务索引
+        public static function leader(){
+            return self::$raft->get(1, 'leader');
+        }
+        //获取当前服务期角色
+        public static function role(){
+            return self::$raft->get(1, 'role');
+        }
+        //获取服务有效期
+        public static function timeout(){
+            return self::$raft->get(1, 'timeout');
+        }
+        //获取任期
+        public static function term(){
+            return self::$raft->get(1, 'term');
+        }
+        //获取投票目标
+        public static function vote(){
+            return self::$raft->get(1, 'vote');
+        }
+        //设置值
+        public static function set($key, $value){
+            $data = self::$raft->get(1);
+            $data[$key] = $value;
+            self::$raft->set(1, $data);
         }
     }

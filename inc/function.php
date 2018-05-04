@@ -17,7 +17,7 @@
 
     //通讯id
     function uid($fd){
-        return md5(raft::$id.'_'.$fd);
+        return md5(raft::id().'_'.$fd);
     }
 
     //客户端识别

@@ -8,8 +8,9 @@
     class appRaft{
 
         public static function term($term){
-            if(raft::$term>$term) error(1001);
-            raft::$timeout = time();
+            if(raft::term()>$term) error(1001);
+            raft::set('term', $term);
+            raft::set('timeout', time());
             var_dump('follower有效期延期');
         }
     }

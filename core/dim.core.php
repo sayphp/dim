@@ -27,7 +27,7 @@
                 //3. 设置互斥锁
                 self::$lock = new swoole_lock(SWOOLE_MUTEX);
                 //4. 初始化swoole_server
-                self::$server = new swoole_server(raft::$current['host'], raft::$current['port']);
+                self::$server = new swoole_server(conf::$server->get(raft::$raft->get(1, 'id'), 'host'), conf::$server->get(raft::$raft->get(1, 'id'), 'port'));
             }catch (Exception $e){
                 echo $e->getCode().'::'.$e->getMessage().PHP_EOL;
                 exit();
@@ -36,7 +36,7 @@
 
         //Start!
         public static function start(){
-            self::$server->set(raft::$current);//配置设定
+            self::$server->set(conf::$server->get(raft::$raft->get(1, 'id')));//配置设定
             self::$server->on('Start','dim::onStart');
             self::$server->on('Shutdown', 'dim::onShutdown');
             self::$server->on('WorkerStart', 'dim::onWorkerStart');

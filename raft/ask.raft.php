@@ -8,10 +8,11 @@
 
         //*任期
         public static function term(){
+            var_dump(raft::term());
             return [
                 'act' => 'server',
                 'method' => 'term',
-                'term' => raft::$term,
+                'term' => raft::term(),
             ];
         }
     }

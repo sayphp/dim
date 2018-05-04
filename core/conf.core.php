@@ -63,7 +63,7 @@
             self::$server->column('work_num', swoole_table::TYPE_INT, 2);//worker数量
             self::$server->column('max_request', swoole_table::TYPE_INT, 2);//最大请求数
             self::$server->column('max_conn', swoole_table::TYPE_INT, 2);//最大连接数
-            self::$server->column('tasker_num', swoole_table::TYPE_INT, 1);//tasker数量
+            self::$server->column('task_worker_num', swoole_table::TYPE_INT, 1);//tasker数量
             self::$server->create();
             foreach($data as $k => $v){
                 self::$server->set($k, $v);
@@ -96,5 +96,22 @@
         //*错误码内容
         public static function error($code){
             return isset(self::$code[$code])?self::$code[$code]:'未知错误';
+        }
+
+        //*服务列表
+        public static function lists($key=0){
+            if($key) return self::$server->get($key);
+            $count = self::$server->count();
+            $data = [];
+            for($i=1;$i<=$count;$i++){
+                $data[$i] = self::$server->get($i);
+            }
+            return $data;
+        }
+        //设置
+        public static function set($id, $key, $value){
+            $data = self::$server->get($id);
+            $data[$key] = $value;
+            self::$server->set($id, $data);
         }
     }
