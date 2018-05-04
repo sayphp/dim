@@ -10,12 +10,18 @@
         public static function check(){}
         //服务状态
         public static function status(){
-            var_dump(conf::$server[raft::$id]['status'],raft::$timeout);
+
+            dim::$tmp++;
+            var_dump(dim::$tmp,'===============');
+            $data = dim::$table->get(1);
+            var_dump($data);
+            $data['id']++;
+            dim::$table->set(1, $data);
+            //var_dump(conf::$server[raft::$id]['status'],raft::$timeout);
             //1.检查当前服务器情况
             $status = dim::$server->stats();
             if(raft::$id==raft::$leader){//2.当前服务器是否leader
                 conf::$server[raft::$id]['status'] = 1;
-                var_dump('========1=======');
                 foreach(conf::$server as $id => $ini){
                     if($id==raft::$id) continue;
                     if(!$ini['status']) continue;

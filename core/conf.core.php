@@ -54,7 +54,20 @@
 
         //服务
         public static function server(){
-            self::$server = self::load('server');
+            $data = self::load('server');
+            self::$server = new swoole_table(1024);
+            self::$server->column('host', swoole_table::TYPE_STRING, 15);//服务地址
+            self::$server->column('port', swoole_table::TYPE_INT, 2);//端口
+            self::$server->column('pass', swoole_table::TYPE_STRING, 16);//密码
+            self::$server->column('status', swoole_table::TYPE_INT, 1);//状态
+            self::$server->column('work_num', swoole_table::TYPE_INT, 2);//worker数量
+            self::$server->column('max_request', swoole_table::TYPE_INT, 2);//最大请求数
+            self::$server->column('max_conn', swoole_table::TYPE_INT, 2);//最大连接数
+            self::$server->column('tasker_num', swoole_table::TYPE_INT, 1);//tasker数量
+            self::$server->create();
+            foreach($data as $k => $v){
+                self::$server->set($k, $v);
+            }
         }
 
         //redis
