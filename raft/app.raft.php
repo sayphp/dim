@@ -28,7 +28,7 @@
             if(raft::term()>=$term) error(1011, '任期：'.$term.'----发起方：'.$cid);
             if(raft::vote()) error(1012);
             raft::set('vote', $cid);
-            var_dump('投票给：'.$cid);
+            //var_dump('投票给：'.$cid);
         }
         //*选举成功
         public static function succ($lid, $term, $conf){

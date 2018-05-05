@@ -50,3 +50,13 @@
         $client->close();
         return $data;
     }
+    //ini写入
+    function ini_write($type, $name, $ini){
+        $content = '';
+        foreach($ini as $k => $v){
+            $content .= $k.'='.$v.PHP_EOL;
+        }
+        $fp = fopen(ROOT.'conf/'.$type.'/'.$name.'.ini', 'w+');
+        $rs = fwrite($fp, $content);
+        return $rs;
+    }

@@ -27,9 +27,13 @@
         public function leader(){
             $this->data['leader'] = appServ::leader();
         }
+        //自检
+        public function check(){
+            dim::$server->task(askServ::check());
+        }
         //状态
         public function status(){
-            dim::$server->task(askServ::status());
+            $this->data = appServ::status();
         }
         //加入集群
         public function join(){
@@ -61,5 +65,9 @@
             $term = $this->get('term');
             $conf = $this->get('conf');
             appRaft::succ($lid, $term, $conf);
+        }
+        //配置备份
+        public function backup(){
+            appServ::backup();
         }
     }

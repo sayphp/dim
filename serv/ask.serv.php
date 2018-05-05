@@ -7,7 +7,12 @@
      */
     class askServ{
         //服务自检
-        public static function check(){}
+        public static function check(){
+            return [
+                'act' => 'server',
+                'method' => 'check',
+            ];
+        }
         //服务状态
         public static function status(){
             return [
@@ -16,13 +21,33 @@
             ];
         }
         //服务数据落地
-        public static function backup(){}
+        public static function backup(){
+            return [
+                'act' => 'server',
+                'method' => 'backup',
+            ];
+        }
         //服务代码更新
-        public static function update(){}
+        public static function update(){
+            return [
+                'act' => 'server',
+                'method' => 'update',
+            ];
+        }
         //服务重加载
-        public static function reload(){}
+        public static function reload(){
+            return [
+                'act' => 'server',
+                'method' => 'reload',
+            ];
+        }
         //回复消息
-        public static function reply(){}
+        public static function reply(){
+            return [
+                'act' => 'server',
+                'method' => 'reply',
+            ];
+        }
         //群发消息
         public static function mass(){}
         //单发消息

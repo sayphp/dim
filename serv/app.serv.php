@@ -7,14 +7,12 @@
      */
     class appServ{
         //服务自检
-        public static function check(){}
-        //服务状态
-        public static function status(){
+        public static function check(){
             $role = raft::role();
             $raft_id = raft::id();
             $leader_id = raft::leader();
             $timeout = raft::timeout();
-            var_dump($role, $raft_id, $leader_id, raft::timeout(), '=================');
+            //var_dump($role, $raft_id, $leader_id, raft::timeout(), '=================');
             switch($role){
                 case 1://leader
                     conf::set($raft_id, 'status', 1);
@@ -52,7 +50,7 @@
                         $data = request($id, askRaft::vote());
                         if($data && $data['status']==0) $vote++;
                     }
-                    var_dump('得票数'.$vote.'，需要票数'. ($count-1)/2);
+                    //var_dump('得票数'.$vote.'，需要票数'. ($count-1)/2);
                     if($vote > ($count-1)/2){//升级为leader
                         raft::set('role', 1);
                         raft::set('leader', $raft_id);
@@ -60,18 +58,35 @@
                         foreach($lists as $id => $ini){
                             if($id==$raft_id) continue;
                             $data = request($id, askRaft::succ());
-                            var_dump($data);
+                            //var_dump($data);
                         }
-                        var_dump(raft::role());
                     }
                     break;
             }
             return true;
         }
+        //服务状态
+        public static function status(){
+            //TODO:返回服务器的状态，细节内容需要根据业务思考，一般包含集群信息、本机信息
+            return dim::$server->stats();
+        }
         //服务数据落地
-        public static function backup(){}
+        public static function backup(){
+            $lists = conf::lists();
+            foreach($lists as $id => $ini){
+                foreach($ini as $k => $v){
+                    if($k=='status'){
+                        $ini[$k] = 0;
+                        break;
+                    }
+                }
+                ini_write('server', $id, $ini);
+            }
+        }
         //服务代码更新
-        public static function update(){}
+        public static function update(){
+
+        }
         //服务重加载
         public static function reload(){}
         //回复消息
