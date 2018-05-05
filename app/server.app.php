@@ -46,6 +46,20 @@
         //任期
         public function term(){
             $term = $this->get('term');
-            appRaft::term($term);
+            $conf = $this->get('conf');
+            appRaft::term($term, $conf);
+        }
+        //投票
+        public function vote(){
+            $term = $this->get('term');
+            $cid = $this->get('cid');
+            appRaft::vote($term, $cid);
+        }
+        //选举成功
+        public function succ(){
+            $lid = $this->get('lid');
+            $term = $this->get('term');
+            $conf = $this->get('conf');
+            appRaft::succ($lid, $term, $conf);
         }
     }

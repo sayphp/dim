@@ -13,6 +13,8 @@
             $role = raft::role();
             $raft_id = raft::id();
             $leader_id = raft::leader();
+            $timeout = raft::timeout();
+            var_dump($role, $raft_id, $leader_id, raft::timeout(), '=================');
             switch($role){
                 case 1://leader
                     conf::set($raft_id, 'status', 1);
@@ -20,24 +22,48 @@
                         if($id==$raft_id) continue;
                         if(!$ini['status']) continue;
                         $data = request($id, askRaft::term());
+                        if(!$data) conf::set($id, 'status', 2);
+                        if($data['code']==1002) conf::set($id, 'status', 3);
+                        if($data['status']==0) conf::set($id, 'status', 1);
                     }
                     break;
                 case 2://follower
                     $info = conf::lists($raft_id);
-                    if($info['status']==0){//3.未加入集群
+                    if($info['status']==0){//未加入集群
                         $data = request($leader_id, askServ::join());
                         if($data && $data['status']==0){
                             conf::set($raft_id, 'status', 1);
                             conf::set($raft_id, 'timeout', $data['data']['timeout']);
                         }
-                    }elseif($info['status']==3){//4.等待重启中
+                    }elseif($info['status']==3){//等待重启中
 
-                    }elseif(raft::timeout()>time()){//4.是否要变成竞选者
+                    }elseif($timeout && $timeout<raft::time()){//是否要变成竞选者
                         raft::set('role', 3);
                     }
                     break;
                 case 3://candidate
-
+                    $count = 0;//集群数量
+                    $vote = 1;//票数
+                    $lists = conf::lists();
+                    foreach($lists as $id => $ini){
+                        if(in_array($ini['status'], [1])) $count++;
+                        if($id==$raft_id) continue;
+                        if(!$ini['status']) continue;
+                        $data = request($id, askRaft::vote());
+                        if($data && $data['status']==0) $vote++;
+                    }
+                    var_dump('得票数'.$vote.'，需要票数'. ($count-1)/2);
+                    if($vote > ($count-1)/2){//升级为leader
+                        raft::set('role', 1);
+                        raft::set('leader', $raft_id);
+                        raft::set('term', raft::term()+1);
+                        foreach($lists as $id => $ini){
+                            if($id==$raft_id) continue;
+                            $data = request($id, askRaft::succ());
+                            var_dump($data);
+                        }
+                        var_dump(raft::role());
+                    }
                     break;
             }
             return true;
