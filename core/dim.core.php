@@ -80,7 +80,6 @@
             ];
             self::$mem->hset($data['data']['uid'], 'fd', $fd);
             $server->send($fd, json_encode($data));
-            echo 'Connect'.PHP_EOL;
         }
         //*收到信息
         public static function onReceive($server, $fd, $reactor_id, $data){
@@ -123,7 +122,6 @@
                         self::$server->send($fd, json_encode($data));
                         break;
                 }
-                echo 'Receive'.PHP_EOL;
             }catch (Exception $e){
                 $data = [
                     'status' => 2,
@@ -137,7 +135,6 @@
         //*链接断开
         public static function onClose($server, $fd, $reactor_id){
             self::$mem->del(uid($fd));
-            var_dump('断开连接');
         }
         //*任务
         public static function onTask($server, $task_id, $src_worker_id, $data){

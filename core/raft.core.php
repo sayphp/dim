@@ -32,7 +32,7 @@
             self::$raft->column('id', swoole_table::TYPE_INT, 2);//当前服务器编号
             self::$raft->column('leader', swoole_table::TYPE_INT, 2);//当前服务器编号
             self::$raft->column('role', swoole_table::TYPE_INT, 1);//当前服务器角色
-            self::$raft->column('timeout', swoole_table::TYPE_INT, 4);//超时时间戳
+            self::$raft->column('timeout', swoole_table::TYPE_INT, 8);//超时时间戳(ms)
             self::$raft->column('term', swoole_table::TYPE_INT, 4);//任期
             self::$raft->column('vote', swoole_table::TYPE_INT, 2);//投票对象
             self::$raft->create();
@@ -104,5 +104,10 @@
             $data = self::$raft->get(1);
             $data[$key] = $value;
             self::$raft->set(1, $data);
+        }
+
+        //当前系统时间
+        public static function time($ms=0){
+            return ceil(microtime(1)*1000)+$ms;
         }
     }

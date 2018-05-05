@@ -7,6 +7,5 @@
      */
     define('ROOT', __DIR__.DIRECTORY_SEPARATOR);
     require ROOT.'inc/init.php';
-
     dim::init();
     dim::start();

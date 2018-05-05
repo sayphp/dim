@@ -10,28 +10,35 @@
         public static function check(){}
         //服务状态
         public static function status(){
-            //1.检查当前服务器情况
-            if(raft::id()==raft::leader()){//2.当前服务器是否leader
-                conf::set(raft::id(), 'status', 1);
-                foreach(conf::lists() as $id => $ini){
-                    if($id==raft::id()) continue;
-                    if(!$ini['status']) continue;
-                    $data = request($id, askRaft::term());
-                }
-            }else{
-                $info = conf::lists(raft::id());
-
-                if($info['status']==0){//3.未加入集群
-                    $data = request(raft::leader(), askServ::join());
-                    if($data && $data['status']==0){
-                        conf::set(raft::id(), 'status', 1);
-                        conf::set(raft::id(), 'timeout', $data['data']['timeout']);
+            $role = raft::role();
+            $raft_id = raft::id();
+            $leader_id = raft::leader();
+            switch($role){
+                case 1://leader
+                    conf::set($raft_id, 'status', 1);
+                    foreach(conf::lists() as $id => $ini){
+                        if($id==$raft_id) continue;
+                        if(!$ini['status']) continue;
+                        $data = request($id, askRaft::term());
                     }
-                }elseif($info['status']==3){//4.等待重启中
+                    break;
+                case 2://follower
+                    $info = conf::lists($raft_id);
+                    if($info['status']==0){//3.未加入集群
+                        $data = request($leader_id, askServ::join());
+                        if($data && $data['status']==0){
+                            conf::set($raft_id, 'status', 1);
+                            conf::set($raft_id, 'timeout', $data['data']['timeout']);
+                        }
+                    }elseif($info['status']==3){//4.等待重启中
 
-                }elseif(raft::timeout()>time()){//4.是否要变成竞选者
+                    }elseif(raft::timeout()>time()){//4.是否要变成竞选者
+                        raft::set('role', 3);
+                    }
+                    break;
+                case 3://candidate
 
-                }
+                    break;
             }
             return true;
         }
@@ -65,7 +72,7 @@
             conf::set($cid, 'port', $cport);
             conf::set($cid, 'pass', $cpass);
             conf::set($cid, 'status', 1);
-            return strtotime('+6 s');//追加有效期
+            return raft::time(6000);//追加有效期
         }
         //leader信息
         public static function leader(){
