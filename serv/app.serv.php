@@ -11,8 +11,6 @@
         //服务状态
         public static function status(){
             //1.检查当前服务器情况
-            //$status = dim::$server->stats();
-            var_dump(conf::lists(raft::id()));
             if(raft::id()==raft::leader()){//2.当前服务器是否leader
                 conf::set(raft::id(), 'status', 1);
                 foreach(conf::lists() as $id => $ini){
@@ -62,7 +60,6 @@
             if($server['host']!= $lhost) error(42);
             if($server['port']!= $lport) error(43);
             if($server['pass']!= $lpass) error(44);
-            var_dump($client, $server);
             if(in_array($client['status'],[1,3])) error(1002);
             conf::set($cid, 'host', $chost);
             conf::set($cid, 'port', $cport);
