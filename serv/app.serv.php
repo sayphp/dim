@@ -85,7 +85,37 @@
         }
         //服务代码更新
         public static function update($cid){
-            $data = request($cid, askServ::diff());//比对文件区别
+            $info = askServ::diff();
+            $client = new swoole_client(SWOOLE_SOCK_TCP);
+            $rs = @$client->connect(conf::$server[$cid]['host'], conf::$server[$cid]['port']);
+            if(!$rs) return false;
+            //接受链接uid
+            $str = $client->recv();
+            $data = json_decode($str, 1);
+            if(!$data) return false;
+            if($data['status']!=0) return false;
+            $info['uid'] = $data['data']['uid'];
+            //注册
+            $rs = $client->send(json_encode(askServ::sign($info['uid'], $cid)));
+            $str = $client->recv();
+            $data = json_decode($str, 1);
+            if(!$data) return false;
+            if($data['status']!=0) return false;
+            $info['session'] = $data['data']['session'];
+            var_dump($info);
+            //*发送请求
+            $rs = $client->send(json_encode($info));
+            if(!$rs) return false;
+            var_dump($rs);
+            $str = $client->recv();
+            $data = json_decode($str, 1);
+            //TODO：文件发送与接受，并落地存储，存在一些细节需要处理
+            var_dump($str, $data);
+            if(!$data) return false;
+            if($data['status']!=0) return false;
+            var_dump($data);
+            $str = $client->recv();
+            var_dump($str);
             var_dump($data);
         }
         //服务重加载
@@ -134,8 +164,31 @@
             return $session;
         }
         //比对
-        public static function diff($lists){
+        public static function diff($fd, $lists){
+            $data = [];
             $local_lists = update_lists();
-            var_dump('比对文件区别', $local_lists, $lists);
+            foreach($local_lists as $lk => $lv){
+                foreach($lists as $k => $v){
+                    if($k==$lk){
+                        if($lv==$v){
+                            unset($local_lists[$lk]);
+                        }
+                        unset($lists[$k]);
+                        break;
+                    }
+                }
+            }
+            if($local_lists){
+                foreach($local_lists as $k => $v){
+                    $local_lists[$k] = filesize(ROOT.$k);
+                }
+            }
+            $data['add'] = $local_lists;
+            $data['del'] = $lists;
+            dim::$server->send($fd, json_encode($data));
+            foreach($data['add'] as $k => $v){
+                dim::$server->sendfile($fd, ROOT.$k);
+            }
+            var_dump('比对文件区别', $data);
         }
     }

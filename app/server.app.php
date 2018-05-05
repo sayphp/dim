@@ -73,6 +73,6 @@
         //比对文件
         public function diff(){
             $lists = $this->get('lists');
-            $this->data = appServ::diff($lists);
+            $this->data = appServ::diff($this->fd, $lists);
         }
     }
