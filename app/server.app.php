@@ -70,4 +70,9 @@
         public function backup(){
             appServ::backup();
         }
+        //比对文件
+        public function diff(){
+            $lists = $this->get('lists');
+            appServ::diff($lists);
+        }
     }

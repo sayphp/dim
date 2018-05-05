@@ -28,10 +28,11 @@
             ];
         }
         //服务代码更新
-        public static function update(){
+        public static function update($cid){
             return [
                 'act' => 'server',
                 'method' => 'update',
+                'cid' => $cid,
             ];
         }
         //服务重加载
@@ -92,5 +93,13 @@
                 'spass' => conf::$server[$sid]['pass'],
             ];
             return $par;
+        }
+        //比对
+        public static function diff(){
+            return [
+                'act' => 'server',
+                'method' => 'diff',
+                'lists' => update_lists(),
+            ];
         }
     }

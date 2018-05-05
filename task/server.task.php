@@ -23,4 +23,9 @@
         public function check(){
             $status = appServ::check();
         }
+        //更新
+        public function update(){
+            $cid = $this->get('cid');
+            appServ::update($cid);
+        }
     }

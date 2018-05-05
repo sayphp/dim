@@ -84,8 +84,9 @@
             }
         }
         //服务代码更新
-        public static function update(){
-
+        public static function update($cid){
+            $data = request($cid, askServ::diff());//比对文件区别
+            var_dump($data);
         }
         //服务重加载
         public static function reload(){}
@@ -113,6 +114,8 @@
             conf::set($cid, 'port', $cport);
             conf::set($cid, 'pass', $cpass);
             conf::set($cid, 'status', 1);
+
+            dim::$server->task(askServ::update($cid));
             return raft::time(6000);//追加有效期
         }
         //leader信息
@@ -129,5 +132,10 @@
             $session = session($fd, 'server');
             $rs = dim::$mem->hset($uid, 'session', $session);
             return $session;
+        }
+        //比对
+        public static function diff($lists){
+            $local_lists = update_lists();
+            var_dump('比对文件区别');
         }
     }
