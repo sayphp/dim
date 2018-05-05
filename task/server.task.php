@@ -5,7 +5,7 @@
      * say
      * 2018-04-27
      */
-    class serverTask{
+    class serverTask extends task{
         //运行
         public function run(){
             while(true){

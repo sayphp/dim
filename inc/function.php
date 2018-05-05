@@ -66,7 +66,7 @@
         $range = '{'.ROOT.'app/*.app.php,'.ROOT.'task/*.task.php,'.ROOT.'conf/code/*.ini}';
         $file_lists = glob($range, GLOB_BRACE);
         foreach($file_lists as $file){
-            $data[$file] = filemtime($file);
+            $data[str_replace(ROOT, '', $file)] = md5_file($file);
         }
         return $data;
     }

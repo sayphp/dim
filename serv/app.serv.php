@@ -136,6 +136,6 @@
         //比对
         public static function diff($lists){
             $local_lists = update_lists();
-            var_dump('比对文件区别');
+            var_dump('比对文件区别', $local_lists, $lists);
         }
     }
