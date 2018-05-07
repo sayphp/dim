@@ -75,4 +75,8 @@
             $lists = $this->get('lists');
             $this->data = appServ::diff($this->fd, $lists);
         }
+        //升级
+        public function upgrade(){
+            dim::$server->task(askServ::update(raft::leader()));
+        }
     }

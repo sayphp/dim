@@ -126,11 +126,24 @@
             }
             $str = $client->recv();
             $data = json_decode($str, 1);
-            if(!$data) return false;
-            return true;
+            //leader发起全局同步
+            $id = raft::id();
+            $leader = raft::leader();
+            if($id==$leader){
+                //投递升级任务
+                foreach(conf::$server as $cid => $v){
+                    if($cid==$id) continue;
+                    if($v['status']!=1) continue;
+                    request($cid, askServ::upgrade());
+                    var_dump('投递升级任务');
+                }
+
+            }
         }
         //服务重加载
-        public static function reload(){}
+        public static function reload(){
+            dim::$server->reload();
+        }
         //回复消息
         public static function reply(){}
         //群发消息

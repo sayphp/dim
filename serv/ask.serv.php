@@ -102,4 +102,11 @@
                 'lists' => update_lists(),
             ];
         }
+        //升级
+        public static function upgrade(){
+            return [
+                'act' => 'server',
+                'method' => 'upgrade',
+            ];
+        }
     }
