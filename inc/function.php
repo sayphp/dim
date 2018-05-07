@@ -58,6 +58,14 @@
         }
         $fp = fopen(ROOT.'conf/'.$type.'/'.$name.'.ini', 'w+');
         $rs = fwrite($fp, $content);
+        fclose($fp);
+        return $rs;
+    }
+    //文件写入
+    function file_write($pathname, $content=''){
+        $fp = fopen($pathname, 'w+');
+        $rs = fwrite($fp, $content);
+        fclose($fp);
         return $rs;
     }
     //目录文件并更
@@ -66,7 +74,10 @@
         $range = '{'.ROOT.'app/*.app.php,'.ROOT.'task/*.task.php,'.ROOT.'conf/code/*.ini}';
         $file_lists = glob($range, GLOB_BRACE);
         foreach($file_lists as $file){
-            $data[str_replace(ROOT, '', $file)] = md5_file($file);
+            $data[str_replace(ROOT, '', $file)] = [
+                'md5' => md5_file($file),
+                'mtime' => filemtime($file),
+            ];
         }
         return $data;
     }

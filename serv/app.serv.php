@@ -8,6 +8,7 @@
     class appServ{
         //服务自检
         public static function check(){
+//            var_dump(conf::lists());
             $role = raft::role();
             $raft_id = raft::id();
             $leader_id = raft::leader();
@@ -20,9 +21,10 @@
                         if($id==$raft_id) continue;
                         if(!$ini['status']) continue;
                         $data = request($id, askRaft::term());
+//                        var_dump($data);
                         if(!$data) conf::set($id, 'status', 2);
-                        if($data['code']==1002) conf::set($id, 'status', 3);
-                        if($data['status']==0) conf::set($id, 'status', 1);
+                        if($data['code']===1002) conf::set($id, 'status', 3);
+                        if($data['status']===0) conf::set($id, 'status', 1);
                     }
                     break;
                 case 2://follower
@@ -102,21 +104,30 @@
             if(!$data) return false;
             if($data['status']!=0) return false;
             $info['session'] = $data['data']['session'];
-            var_dump($info);
+//            var_dump($info);
             //*发送请求
             $rs = $client->send(json_encode($info));
             if(!$rs) return false;
-            var_dump($rs);
+//            var_dump($rs);
             $str = $client->recv();
             $data = json_decode($str, 1);
-            //TODO：文件发送与接受，并落地存储，存在一些细节需要处理
-            var_dump($str, $data);
+//            var_dump($str, $data);
             if(!$data) return false;
-            if($data['status']!=0) return false;
-            var_dump($data);
+            if($data['add']){
+                foreach($data['add'] as $k => $v){
+                    $str = $client->recv($v);
+                    file_write(ROOT.$k, $str);
+                }
+            }
+            if($data['del']){
+                foreach($data['del'] as $k => $v){
+                    @unlink(ROOT.$k);
+                }
+            }
             $str = $client->recv();
-            var_dump($str);
-            var_dump($data);
+            $data = json_decode($str, 1);
+            if(!$data) return false;
+            return true;
         }
         //服务重加载
         public static function reload(){}
@@ -170,10 +181,16 @@
             foreach($local_lists as $lk => $lv){
                 foreach($lists as $k => $v){
                     if($k==$lk){
-                        if($lv==$v){
+                        if($lv['md5']==$v['md5']){
                             unset($local_lists[$lk]);
+                            unset($lists[$k]);
+                        }else{
+                            if($lv['mtime'] >= $v['mtime']){
+                                unset($lists[$k]);
+                            }else{
+                                unset($local_lists[$lk]);
+                            }
                         }
-                        unset($lists[$k]);
                         break;
                     }
                 }
@@ -183,12 +200,18 @@
                     $local_lists[$k] = filesize(ROOT.$k);
                 }
             }
+            if($lists){
+                foreach($lists as $k => $v){
+                    $lists[$k] = filesize(ROOT.$k);
+                }
+            }
             $data['add'] = $local_lists;
             $data['del'] = $lists;
             dim::$server->send($fd, json_encode($data));
-            foreach($data['add'] as $k => $v){
-                dim::$server->sendfile($fd, ROOT.$k);
+            if($data['add']){
+                foreach($data['add'] as $k => $v){
+                    dim::$server->sendfile($fd, ROOT.$k);
+                }
             }
-            var_dump('比对文件区别', $data);
         }
     }
