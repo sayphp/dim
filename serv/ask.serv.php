@@ -82,11 +82,10 @@
             ];
         }
         //登陆
-        public static function sign($uid=0, $sid=0){
+        public static function sign($sid=0){
             $par = [
                 'act' => 'server',
                 'method' => 'sign',
-                'uid' => $uid,
                 'sid' => $sid,//服务ID
                 'shost' => conf::$server[$sid]['host'],//服务
                 'sport' => conf::$server[$sid]['port'],

@@ -91,14 +91,8 @@
             $client = new swoole_client(SWOOLE_SOCK_TCP);
             $rs = @$client->connect(conf::$server[$cid]['host'], conf::$server[$cid]['port']);
             if(!$rs) return false;
-            //接受链接uid
-            $str = $client->recv();
-            $data = json_decode($str, 1);
-            if(!$data) return false;
-            if($data['status']!=0) return false;
-            $info['uid'] = $data['data']['uid'];
             //注册
-            $rs = $client->send(json_encode(askServ::sign($info['uid'], $cid)));
+            $rs = $client->send(json_encode(askServ::sign( $cid)));
             $str = $client->recv();
             $data = json_decode($str, 1);
             if(!$data) return false;

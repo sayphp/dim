@@ -48,7 +48,7 @@
                 'status' => 0,
                 'error' => 'ok',
                 'data' => [
-                    'test' => 'panda kill!!!!',
+                    'example' => 'panda kill!!!!',
                 ],
             ];
             $this->server->send($this->fd, json_encode($data));

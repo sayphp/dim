@@ -70,24 +70,32 @@
         }
         //*连接
         public static function onConnect($server, $fd, $reactor_id){
-            $data = [
-                'status' => 0,
-                'code' => 0,
-                'error'=> 'ok',
-                'data' => [
-                    'uid' => uid($fd),
-                ],
-            ];
-            self::$mem->hset($data['data']['uid'], 'fd', $fd);
-            $server->send($fd, json_encode($data));
+            $uid = uid($fd);
+            self::$mem->hset($uid, 'fd', $fd);
+            self::$mem->hset($uid, 'protocol', 'dim');
         }
         //*收到信息
         public static function onReceive($server, $fd, $reactor_id, $data){
             try{
+                $uid = uid($fd);
+                $line_with_key = substr($data, strpos($data, 'Sec-WebSocket-Key:') + 18);
+                $key = trim(substr($line_with_key, 0, strpos($line_with_key, "\r\n")));
+                if($key){
+                    // 生成升级密匙,并拼接websocket升级头
+                    $upgrade_key = base64_encode(sha1($key . "258EAFA5-E914-47DA-95CA-C5AB0DC85B11", true));// 升级key的算法
+                    $upgrade_message = "HTTP/1.1 101 Switching Protocols\r\n";
+                    $upgrade_message .= "Upgrade: websocket\r\n";
+                    $upgrade_message .= "Sec-WebSocket-Version: 13\r\n";
+                    $upgrade_message .= "Connection: Upgrade\r\n";
+                    $upgrade_message .= "Sec-WebSocket-Accept:" . $upgrade_key . "\r\n\r\n";
+//                    var_dump($key, $upgrade_message);
+                    self::$server->send($fd, $upgrade_message);
+                    self::$mem->hset($uid, 'protocol', 'websocket');
+                    return true;
+                }
+
                 $data = json_decode($data, 1);
                 if(!$data) close($fd, 301);
-                if(!isset($data['uid'])) close($fd, 201);
-                if($data['uid'] != uid($fd)) close($fd, 221);
                 if(!isset($data['act'])) close($fd, 202);
                 if(!isset($data['method'])) close($fd, 203);
                 $file = ROOT.'app/'.$data['act'].'.app.php';
@@ -95,7 +103,7 @@
                 require_once $file;
                 if(!in_array($data['method'], ['sign'])){
                     if(!isset($data['session'])) close($fd, 204);
-                    $session = self::$mem->hget($data['uid'], 'session');
+                    $session = self::$mem->hget($uid, 'session');
                     if(!$session) close($fd, 224);
                     if($session!=$data['session']) close($fd, 224);
                     //TODO：追加角色验证，可以约束不同身份的调用，后期追加

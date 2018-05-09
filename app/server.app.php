@@ -8,7 +8,7 @@
     class serverApp extends app implements appInterface{
         //登陆
         public function sign(){
-            $uid = $this->get('uid');
+            $uid = uid($this->fd);
             $sid = $this->get('sid');
             $shost = $this->get('shost');
             $sport = $this->get('sport');

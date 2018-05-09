@@ -29,14 +29,8 @@
         $client = new swoole_client(SWOOLE_SOCK_TCP);
         $rs = @$client->connect(conf::$server[$id]['host'], conf::$server[$id]['port']);
         if(!$rs) return false;
-        //接受链接uid
-        $str = $client->recv();
-        $data = json_decode($str, 1);
-        if(!$data) return false;
-        if($data['status']!=0) return false;
-        $info['uid'] = $data['data']['uid'];
         //注册
-        $rs = $client->send(json_encode(askServ::sign($info['uid'], $id)));
+        $rs = $client->send(json_encode(askServ::sign($id)));
         $str = $client->recv();
         $data = json_decode($str, 1);
         if(!$data) return false;
@@ -80,4 +74,29 @@
             ];
         }
         return $data;
+    }
+
+
+
+    function frame($msg) {
+        $frame = [];
+        $frame[0] = '81';
+        $len = strlen($msg);
+        if ($len < 126) {
+            $frame[1] = $len < 16 ? '0' . dechex($len) : dechex($len);
+        } else if ($len < 65025) {
+            $s = dechex($len);
+            $frame[1] = '7e' . str_repeat('0', 4 - strlen($s)) . $s;
+        } else {
+            $s = dechex($len);
+            $frame[1] = '7f' . str_repeat('0', 16 - strlen($s)) . $s;
+        }
+        $data = '';
+        $l = strlen($msg);
+        for ($i = 0; $i < $l; $i++) {
+            $data .= dechex(ord($msg{$i}));
+        }
+        $frame[2] = $data;
+        $data = implode('', $frame);
+        return pack("H*", $data);
     }
