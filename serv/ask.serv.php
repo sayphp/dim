@@ -52,7 +52,7 @@
         //群发消息
         public static function mass(){}
         //单发消息
-        public static function send(){}
+        public static function send($msg){}
         //转发消息
         public static function forward(){}
         //加入集群

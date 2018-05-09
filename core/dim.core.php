@@ -94,8 +94,9 @@
                     self::$mem->hset($uid, 'protocol', 'websocket');
                     return true;
                 }
-                $data = $protocol=='websocket'?json_decode(decode($data), 1):json_decode($data, 1);
                 var_dump($data);
+                if($protocol=='websocket') var_dump(decode($data));
+                $data = $protocol=='websocket'?json_decode(decode($data), 1):json_decode($data, 1);
                 if(!$data) close($fd, 301);
                 if(!isset($data['act'])) close($fd, 202);
                 if(!isset($data['method'])) close($fd, 203);
@@ -138,13 +139,15 @@
                     'code' => $e->getCode(),
                     'error' => $e->getMessage(),
                 ];
-                self::$server->send($fd, json_encode($data));
+                $recv = ($protocol=='websocket')?encode(json_encode($data)):json_encode($data);
+                self::$server->send($fd, $recv);
                 echo $e->getCode().'::'.$e->getMessage().PHP_EOL;
             }
         }
         //*链接断开
         public static function onClose($server, $fd, $reactor_id){
             self::$mem->del(uid($fd));
+            var_dump('断开连接');
         }
         //*任务
         public static function onTask($server, $task_id, $src_worker_id, $data){

@@ -55,4 +55,24 @@
             if(isset($key)) return $this->redis->del($key);
             return false;
         }
+        //增加序列
+        public function sadd($key, $val){
+            if(isset($key) && isset($val)) return $this->redis->sAdd($key, $val);
+            return false;
+        }
+        //是否存在序列
+        public function sis($key, $val){
+            if(isset($key) && isset($val)) return $this->redis->sIsMember($key, $val);
+            return false;
+        }
+        //所有集合基数
+        public function scard($key){
+            if(isset($key)) return $this->redis->sCard($key);
+            return false;
+        }
+        //所有集合
+        public function smem($key){
+            if(isset($key)) return $this->redis->sMembers($key);
+            return false;
+        }
     }
