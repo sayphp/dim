@@ -33,7 +33,8 @@
         ws.onerror = function(e) { console.log(e); };
         var info = {
             act:'admin',
+            method:'sign',
         };
-        ws.send('{}');
+
     </script>
 </html>

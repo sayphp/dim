@@ -78,6 +78,7 @@
         public static function onReceive($server, $fd, $reactor_id, $data){
             try{
                 $uid = uid($fd);
+                $protocol = self::$mem->hget($uid, 'protocol');
                 $line_with_key = substr($data, strpos($data, 'Sec-WebSocket-Key:') + 18);
                 $key = trim(substr($line_with_key, 0, strpos($line_with_key, "\r\n")));
                 if($key){
@@ -93,8 +94,8 @@
                     self::$mem->hset($uid, 'protocol', 'websocket');
                     return true;
                 }
-
-                $data = json_decode($data, 1);
+                $data = $protocol=='websocket'?json_decode(decode($data), 1):json_decode($data, 1);
+                var_dump($data);
                 if(!$data) close($fd, 301);
                 if(!isset($data['act'])) close($fd, 202);
                 if(!isset($data['method'])) close($fd, 203);
@@ -119,15 +120,16 @@
                     'error'=> 'ok',
                 ];
                 if($cls->data!==null) $data['data'] = $cls->data;
+                $recv = ($protocol=='websocket')?encode(json_encode($data)):json_encode($data);
                 switch($cls->method){
                     case 1://回复
-                        self::$server->send($fd, json_encode($data));
+                        self::$server->send($fd, $recv);
                         break;
                     case 2://转发
-                        self::$server->send($fd, json_encode($data));
+                        self::$server->send($fd, $recv);
                         break;
                     case 3://群发
-                        self::$server->send($fd, json_encode($data));
+                        self::$server->send($fd, $recv);
                         break;
                 }
             }catch (Exception $e){

@@ -77,26 +77,45 @@
     }
 
 
-
-    function frame($msg) {
-        $frame = [];
-        $frame[0] = '81';
-        $len = strlen($msg);
-        if ($len < 126) {
-            $frame[1] = $len < 16 ? '0' . dechex($len) : dechex($len);
-        } else if ($len < 65025) {
-            $s = dechex($len);
-            $frame[1] = '7e' . str_repeat('0', 4 - strlen($s)) . $s;
+    //websocket解码
+    function decode($received){
+        $len = $masks = $data = $decoded = null;
+        $buffer = $received;
+        $len = ord($buffer[1]) & 127;
+        if ($len === 126) {
+            $masks = substr($buffer, 4, 4);
+            $data  = substr($buffer, 8);
         } else {
-            $s = dechex($len);
-            $frame[1] = '7f' . str_repeat('0', 16 - strlen($s)) . $s;
+            if ($len === 127) {
+                $masks = substr($buffer, 10, 4);
+                $data  = substr($buffer, 14);
+            } else {
+                $masks = substr($buffer, 2, 4);
+                $data  = substr($buffer, 6);
+            }
         }
-        $data = '';
-        $l = strlen($msg);
-        for ($i = 0; $i < $l; $i++) {
-            $data .= dechex(ord($msg{$i}));
+        for ($index = 0; $index < strlen($data); $index++) {
+            $decoded .= $data[$index] ^ $masks[$index % 4];
         }
-        $frame[2] = $data;
-        $data = implode('', $frame);
-        return pack("H*", $data);
+
+        return $decoded;
+    }
+
+    //websocket编码
+    function encode($buffer){
+        $len = strlen($buffer);
+        $first_byte = "\x81";
+
+        if ($len <= 125) {
+            $encode_buffer = $first_byte . chr($len) . $buffer;
+        } else {
+            if ($len <= 65535) {
+                $encode_buffer = $first_byte . chr(126) . pack("n", $len) . $buffer;
+            } else {
+                //pack("xxxN", $len)pack函数只处理2的32次方大小的文件，实际上2的32次方已经4G了。
+                $encode_buffer = $first_byte . chr(127) . pack("xxxxN", $len) . $buffer;
+            }
+        }
+
+        return $encode_buffer;
     }
