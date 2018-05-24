@@ -75,4 +75,9 @@
             if(isset($key)) return $this->redis->sMembers($key);
             return false;
         }
+        //模糊查询
+        public function keys($key){
+            if(isset($key)) return $this->redis->keys($key);
+            return false;
+        }
     }

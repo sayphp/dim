@@ -50,7 +50,14 @@
             ];
         }
         //群发消息
-        public static function mass(){}
+        public static function mass($user='all', $msg=''){
+            return [
+                'act' => 'server',
+                'method' => 'mass',
+                'target' => $user,
+                'msg' => $msg,
+            ];
+        }
         //单发消息
         public static function send($msg){}
         //转发消息

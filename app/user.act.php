@@ -5,7 +5,7 @@
      * Date: 18-3-7
      * Time: 下午5:53
      */
-    class userAct extends act implements actInterface{
+    class userAct extends app implements appInterface{
 
         public function sign(){
             $d = [

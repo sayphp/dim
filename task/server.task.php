@@ -28,4 +28,29 @@
             $cid = $this->get('cid');
             appServ::update($cid);
         }
+        //群发
+        public function mass(){
+            var_dump('================', '投递群发任务');
+            $target = $this->get('target');
+            $msg = $this->get('msg');
+            switch($target){
+                case 'zhishi':
+//                    foreach(dim::$server->connections as $fd){
+//                        dim::$server->send($fd, encode(json_encode(appServ::send($target, 'msg', $msg))));
+//                    }
+                    $user_keys = dim::$mem->keys('zhishi::*');
+                    foreach($user_keys as $key){
+                        $u_lists = dim::$mem->smem($key);
+                        foreach($u_lists as $uid){
+                            $fd = dim::$mem->hget($uid, 'fd');
+                            var_dump($fd);
+                            var_dump('======投递：'.$fd);
+                            dim::$server->send($fd, encode(json_encode(appServ::send($target, 'msg', $msg))));
+                        }
+                    }
+                    break;
+                default:
+                    error(999);
+            }
+        }
     }
