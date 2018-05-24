@@ -6,6 +6,8 @@
      */
     class adminApp extends app implements appInterface{
 
+        public $method = 0;
+
         public function sign(){
             $uid = uid($this->fd);
             $sess = $this->get('sess');
@@ -17,10 +19,12 @@
             if(!isset($users[$sess])) error(2003);
             dim::$mem->hset($uid, 'session', md5($sess));
             dim::$mem->sadd('user::'.$sess, $uid);
-            $this->data['session'] = md5($sess);
-            $this->data['fd'] = $this->fd;
-            $this->data['uid'] = $uid;
-            $this->data['name'] = $users[$sess];
+            $data['session'] = md5($sess);
+            $data['fd'] = $this->fd;
+            $data['uid'] = $uid;
+            $data['name'] = $users[$sess];
+            $recv = encode(json_encode(appServ::reply('admin', 'sign', $data)));
+            dim::$server->send($this->fd, $recv);
         }
 
         public function msg(){
@@ -32,15 +36,8 @@
                 var_dump($lists);
                 foreach($lists as $v){
                     $fd = dim::$mem->hget($v, 'fd');
-                    $data = [
-                        'act' => 'admin',
-                        'method' => 'msg',
-                        'data' => [
-                            'msg' => $msg
-                        ],
-                    ];
                     var_dump($this->fd, $fd,'==================');
-                    $recv = encode(json_encode($data));
+                    $recv = encode(json_encode(appServ::send('admin', 'msg', $msg)));
                     dim::$server->send($fd, $recv);
                 }
 

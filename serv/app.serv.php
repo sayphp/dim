@@ -139,11 +139,31 @@
             dim::$server->reload();
         }
         //回复消息
-        public static function reply(){}
+        public static function reply($act, $method, $data){
+            return [
+                'status' => 0,
+                'code' => 0,
+                'error' => 'ok',
+                'act' => $act,
+                'method' => $method,
+                'data' => $data,
+            ];
+        }
         //群发消息
         public static function mass(){}
         //单发消息
-        public static function send(){}
+        public static function send($act, $method, $msg){
+            return [
+                'status' => 0,
+                'code' => 0,
+                'error' => 'ok',
+                'act' => $act,
+                'method' => $method,
+                'data' => [
+                    'msg' => $msg,
+                ],
+            ];
+        }
         //转发消息
         public static function forward(){}
         //加入集群

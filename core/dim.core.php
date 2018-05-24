@@ -89,7 +89,7 @@
                     $upgrade_message .= "Sec-WebSocket-Version: 13\r\n";
                     $upgrade_message .= "Connection: Upgrade\r\n";
                     $upgrade_message .= "Sec-WebSocket-Accept:" . $upgrade_key . "\r\n\r\n";
-//                    var_dump($key, $upgrade_message);
+                    //var_dump($key, $upgrade_message);
                     self::$server->send($fd, $upgrade_message);
                     self::$mem->hset($uid, 'protocol', 'websocket');
                     return true;
@@ -119,6 +119,8 @@
                     'status' => 0,
                     'code' => 0,
                     'error'=> 'ok',
+                    'act' => $data['act'],
+                    'method' => $data['method'],
                 ];
                 if($cls->data!==null) $data['data'] = $cls->data;
                 $recv = ($protocol=='websocket')?encode(json_encode($data)):json_encode($data);
@@ -126,16 +128,12 @@
                     case 1://回复
                         self::$server->send($fd, $recv);
                         break;
-                    case 2://转发
-                        self::$server->send($fd, $recv);
-                        break;
-                    case 3://群发
-                        self::$server->send($fd, $recv);
-                        break;
                 }
             }catch (Exception $e){
                 $data = [
                     'status' => 2,
+                    'act' => $data['act'],
+                    'method' => $data['method'],
                     'code' => $e->getCode(),
                     'error' => $e->getMessage(),
                 ];
